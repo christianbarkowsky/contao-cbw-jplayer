@@ -1,0 +1,58 @@
+
+<script>
+
+(function($) {
+	$(document).ready(function() {
+	
+		var	cbw_jPlayer_<?php echo $this->id; ?> = $("#jquery_jplayer_<?php echo $this->id; ?>");
+
+	   	cbw_jPlayer_<?php echo $this->id; ?>.jPlayer({
+	    	ready: function (event) {
+		    	$(this).jPlayer("setMedia", {
+			    	oga: "<?php echo $this->files[0]['filename']; ?>"
+			    });
+			},		
+			swfPath: "system/modules/cbw_jplayer/assets/js",
+			supplied: "oga",
+			wmode: "window",
+			cssSelectorAncestor: "#jp_container_<?php echo $this->id; ?>"
+		});
+
+		// Create click handlers for the different tracks
+		$("#jp_container_<?php echo $this->id; ?> .track").click(function(e) {
+			cbw_jPlayer_<?php echo $this->id; ?>.jPlayer("setMedia", {
+				oga: $(this).attr("href")
+			});
+			
+			$('[id*="jquery_jplayer_"]').jPlayer("stop");
+			
+			cbw_jPlayer_<?php echo $this->id; ?>.jPlayer("play");
+			
+			return false;
+		});
+
+
+	});
+})(jQuery);
+
+</script>
+
+<div class="<?php echo $this->class; ?> block"<?php echo $this->cssID; ?><?php if ($this->style): ?> style="<?php echo $this->style; ?>"<?php endif; ?>>
+<?php if ($this->headline): ?>
+
+<<?php echo $this->hl; ?>><?php echo $this->headline; ?></<?php echo $this->hl; ?>>
+<?php endif; ?>
+
+	<div id="jquery_jplayer_<?php echo $this->id; ?>"></div>
+    <div id="jp_container_<?php echo $this->id; ?>">
+    
+		<ul id="jquery_jplayer_playlist">
+		<?php foreach ($this->files as $file): ?>
+			<li><a href="<?php echo $file['filename']; ?>" title="<?php echo $file['title']; ?>" class="track"><?php echo $file['title']; ?></a></li>
+		<?php endforeach; ?>
+		</ul>
+    
+    	<a href="#" class="jp-play">Play</a><br><a href="#" class="jp-pause">Pause</a>
+    </div>
+
+</div>
