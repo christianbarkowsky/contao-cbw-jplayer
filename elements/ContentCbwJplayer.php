@@ -33,14 +33,7 @@
  */
 namespace Contao;
 
-/**
- * Class ContentImage
- *
- * Front end content element "image".
- * @copyright  Leo Feyer 2005-2012
- * @author     Leo Feyer <http://contao.org>
- * @package    Core
- */
+
 class ContentCbwJplayer extends \ContentElement
 {
 
@@ -76,60 +69,31 @@ class ContentCbwJplayer extends \ContentElement
 	
 		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/cbw_jplayer/assets/js/jquery.jplayer.min.js';
 		
-		$multiMP3SRC = deserialize($this->multiMP3SRC);
+		$objMp3File = \FilesModel::findByPk($this->singleMP3SRC);
 
-		// Return if there are no files
-		if (!is_array($multiMP3SRC) || empty($multiMP3SRC))
+		if ($objMp3File === null || !is_file(TL_ROOT . '/' . $objMp3File->path))
 		{
 			return '';
 		}
+		else
+		{
+			$this->Template->mp3filename = pathinfo($objMp3File->path, PATHINFO_FILENAME);
+			$this->Template->mp3filepath = pathinfo($objMp3File->path, PATHINFO_DIRNAME);
+		}
 		
-		// Get the file entries from the database
-		$objFiles = \FilesModel::findMultipleByIds($multiMP3SRC);
+		$objOggFile = \FilesModel::findByPk($this->singleOGGSRC);
 
-		if ($objFiles === null)
+		if ($objOggFile === null || !is_file(TL_ROOT . '/' . $objOggFile->path))
 		{
 			return '';
 		}
-		
-		// Get all files
-		while ($objFiles->next())
+		else
 		{
-			// Continue if the files has been processed or does not exist
-			if (isset($files[$objFiles->path]) || !file_exists(TL_ROOT . '/' . $objFiles->path))
-			{
-				continue;
-			}
-			
-			$arrMeta = $this->getMetaData($objFiles->meta, $objPage->language);
-			
-			// Use the file name as title if none is given
-			if ($arrMeta['title'] == '')
-			{
-				$arrMeta['title'] = specialchars(str_replace('_', ' ', preg_replace('/^[0-9]+_/', '', $objFile->filename)));
-			}
-			
-			// Add the image
-			$files[$objFiles->path] = array
-			(
-				'id'        => $objFiles->id,
-				'name'      => $objFile->basename,
-				'title'     => $arrMeta['title'],
-				'link'      => $arrMeta['title'],
-				'caption'   => $arrMeta['caption'],
-				'href'      => \Environment::get('request') . (($GLOBALS['TL_CONFIG']['disableAlias'] || strpos(\Environment::get('request'), '?') !== false) ? '&amp;' : '?') . 'file=' . $this->urlEncode($objFiles->path),
-				'filesize'  => $this->getReadableSize($objFile->filesize, 1),
-				'icon'      => TL_FILES_URL . 'system/themes/' . $this->getTheme() . '/images/' . $objFile->icon,
-				'mime'      => $objFile->mime,
-				'meta'      => $arrMeta,
-				'extension' => $objFile->extension,
-				'path'      => $objFile->dirname,
-				'filename'  => $this->urlEncode($objFiles->path)
-			);
+			$this->Template->oggfilename = pathinfo($objOggFile->path, PATHINFO_FILENAME);
+			$this->Template->oggfilepath = pathinfo($objOggFile->path, PATHINFO_DIRNAME);
 		}
 		
-		$this->Template->id = $this->id;
-		$this->Template->files = array_values($files);
+		$this->Template->id = $this->id;		
 	}
 }
 
